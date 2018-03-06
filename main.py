@@ -9,8 +9,17 @@ A very basic demonstration of a wireframe plot.
 
 from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
+from matplotlib.widgets import TextBox
 import numpy as np
 from functools import partial
+from mathparser import MathParser
+
+
+PARSER = 'eval'  # eval or text
+math_parser = MathParser()
+initial_formula = "(x*x) - (y*y)"
+
+fig, ax, plot = None, None, None
 
 
 def get_graph_data(f, x_min, x_max, y_min, y_max):
@@ -38,21 +47,34 @@ def get_graph_data(f, x_min, x_max, y_min, y_max):
     return X, Y, Z
 
 
+def submit(text):
+    global f, ax, plot
+    f = partial(text_based_function, s=text)
+    print "new formula: %s" % text
+    X, Y, Z = get_graph_data(f, x_min=-50, x_max=50, y_min=-50, y_max=50)
+    ax.clear()
+    plot = ax.plot_surface(X, Y, Z, rcount=len(Y[0])/4, ccount=len(X[0])/4, cmap='plasma', edgecolor='none')
+    plt.draw()
+
+
 def draw_init(X, Y, Z):
+    global fig, ax, plot
     # Plot a basic wireframe.
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.plot_surface(X, Y, Z, rcount=len(Y[0])/4, ccount=len(X[0])/4, cmap='plasma', edgecolor='none')
+    axbox = plt.axes([0.1, 0.05, 0.8, 0.075])
+    text_box = TextBox(axbox, 'Evaluate', initial=initial_formula)
+    text_box.on_submit(submit)
+
+    plot = ax.plot_surface(X, Y, Z, rcount=len(Y[0])/4, ccount=len(X[0])/4, cmap='plasma', edgecolor='none')
     plt.show()
 
 
 def evaluate_math_expression(s):
-    from fourFn import BNF, evaluateStack
+    global math_parser
     try:
-        exprStack = BNF().parseString(s, parseAll=True)
-        val = evaluateStack(exprStack[:])
-        return val
+        return math_parser.evaluate(s)
     except Exception as e:
         print "error: "+str(e)
         return None
@@ -65,33 +87,13 @@ def ff(x, y):
 def text_based_function(s, x, y):
     s.replace("x", str(x))
     subst = s.replace("x", str(x)).replace("y", str(y))
-    return evaluate_math_expression(subst)
+    if PARSER == 'eval':
+        return eval(s)
+    elif PARSER == 'text':
+        return evaluate_math_expression(subst)
+    else:
+        print "Invalid PARSER"
+        return None
 
-
-
-# f = partial(text_based_function, s="(x*x) - (y*y)")
-# draw_init(*get_graph_data(f, x_min=-50, x_max=50, y_min=-50, y_max=50))
-
-# print evaluate_math_expression(s="3*3 - 2*2")
-# print type(evaluate_math_expression(s="3*3 - 2*2"))
-
-
-# print text_based_function(s="x*x - y*y", x=1, y=2)
-
-
-#draw_init(*get_graph_data(ff, x_min=-50, x_max=50, y_min=-50, y_max=50))
-# draw(f=f, x_min=-50, x_max=50, y_min=-50, y_max=50)
-
-
-s = "(3*2)-(2*1)"
-
-# from fourFn import BNF, evaluateStack
-# # print evaluate_math_expression(s)
-# exprStack = BNF().parseString(s, parseAll=True)
-# print exprStack
-# val = evaluateStack(exprStack[:])
-# print val
-
-# from mathparser import MathParser
-# mp = MathParser()
-# print mp.evaluate(s)
+f = partial(text_based_function, s=initial_formula)
+draw_init(*get_graph_data(f, x_min=-50, x_max=50, y_min=-50, y_max=50))

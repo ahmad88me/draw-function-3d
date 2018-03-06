@@ -1,3 +1,7 @@
+# mathparser.py
+# Updated by: Ahmad Alobaid
+# based on fourFn.py which is developer by Paul McGire. No major changes, only wrapper it into a class for convenience
+#
 # fourFn.py
 #
 # Demonstration of the pyparsing module, implementing a simple 4-function expression parser,
@@ -9,6 +13,7 @@
 #
 # Copyright 2003-2009 by Paul McGuire
 #
+
 from pyparsing import Literal, CaselessLiteral, Word, Group, Optional, \
     ZeroOrMore, Forward, nums, alphas, alphanums, Regex, ParseException, \
     CaselessKeyword, Suppress
