@@ -20,6 +20,7 @@ from math import log, log10
 # np.seterr(divide='ignore', invalid='ignore')
 
 WIRE = True
+HIDE = False
 PARSER = 'eval'  # eval or text
 math_parser = MathParser()
 # initial_formula = "(x*x) - (y*y)"
@@ -110,8 +111,17 @@ def set_y_range(y_range_text):
     y_max = float(a)
 
 
+def press(event):
+    global HIDE
+    if event.key == 'h':
+        print "h is clicked"
+        for w in widgets:
+            w.set_visible(HIDE)
+        HIDE = not HIDE
+
+
 def draw_init(X, Y, Z):
-    global fig, ax, plot, text_box
+    global fig, ax, plot, widgets
     # Plot a basic wireframe.
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -135,6 +145,10 @@ def draw_init(X, Y, Z):
     bbox = plt.axes([0, 0.9, 0.1, 0.1])
     b = Button(bbox, '(un)wire')
     b.on_clicked(toggle_wire)
+
+    widgets = [axbox, xbox, ybox, bbox]
+
+    fig.canvas.mpl_connect('key_press_event', press)
 
     if WIRE:
         plot = ax.plot_wireframe(X, Y, Z, rcount=len(Y[0]) / 4, ccount=len(X[0]) / 4)
@@ -180,6 +194,7 @@ x_min = -50
 y_min = -50
 x_max = 50
 y_max = 50
+widgets = []
 set_x_range(initial_x_range)
 set_y_range(initial_y_range)
 f = partial(text_based_function, s=initial_formula)
