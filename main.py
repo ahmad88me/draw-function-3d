@@ -38,15 +38,16 @@ def get_graph_data(f, x_min, x_max, y_min, y_max):
     y_step = (y_max-y_min)/50.0
     # x_step = (x_max-x_min)/200.0
     # y_step = (y_max-y_min)/200.0
-    X = np.arange(x_min, x_max, x_step)
-    Y = np.arange(y_min, y_max, y_step)
+    X = np.arange(x_min, x_max + x_step, x_step)
+    Y = np.arange(y_min, y_max + y_step, y_step)
     zlist = []
     xy_note = []
     X2 = []
     Y2 = []
     Z2 = []
-    for x in X:
-        for y in Y:
+
+    for y in Y:
+        for x in X:
             try:
                 z = f(x=x, y=y)
                 if z is None:
@@ -61,8 +62,6 @@ def get_graph_data(f, x_min, x_max, y_min, y_max):
     Z = np.array(zlist)
     Z = Z.reshape(len(X), len(Y))
     X, Y = np.meshgrid(X, Y)
-    print "Z: "
-    print Z
     return X, Y, Z
 
 
@@ -73,6 +72,16 @@ def submit(text):
     print "new formula: %s" % text
     X, Y, Z = get_graph_data(f, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
     ax.clear()
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
+
+    print "X,Y,Z"
+    print X[0]
+    print Y[0]
+    print Z[0]
+
+
     if WIRE:
         plot = ax.plot_wireframe(X, Y, Z, rcount=len(Y[0]) / 4, ccount=len(X[0]) / 4)
     else:
@@ -106,6 +115,10 @@ def draw_init(X, Y, Z):
     # Plot a basic wireframe.
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+
+    ax.set_xlabel('X axis')
+    ax.set_ylabel('Y axis')
+    ax.set_zlabel('Z axis')
 
     axbox = plt.axes([0.2, 0.06, 0.7, 0.075])
     text_box = TextBox(axbox, 'Evaluate', initial=initial_formula)
@@ -167,5 +180,7 @@ x_min = -50
 y_min = -50
 x_max = 50
 y_max = 50
+set_x_range(initial_x_range)
+set_y_range(initial_y_range)
 f = partial(text_based_function, s=initial_formula)
-draw_init(*get_graph_data(f, x_min=-50, x_max=50, y_min=-50, y_max=50))
+draw_init(*get_graph_data(f, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max))
